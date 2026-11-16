@@ -1,12 +1,143 @@
 {
-  "id": "woodwork",
-  "name": "Woodwork",
-  "version": "0.1.6",
+  "id": "woodwork-sdh",
+  "name": "Woodwork SDH",
+  "version": "0.1.6-sdh.1",
   "description": "Cabinets and furniture in sheet goods: carcass generator and cut list.",
   "capabilities": ["commands@0.1"],
   "runtime": {
     "module": "woodwork.wasm",
     "entries": [
+      {
+        "name": "base",
+        "effect": "edit",
+        "slots": [
+          {
+            "kind": "menu",
+            "name": "SDH Base Cabinet"
+          },
+          {
+            "kind": "ribbon",
+            "name": "SDH Base Cabinet"
+          }
+        ],
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "layout": {
+              "type": "string",
+              "title": "Base layout",
+              "default": "drawers",
+              "oneOf": [
+                {
+                  "const": "drawers",
+                  "title": "Drawer base"
+                },
+                {
+                  "const": "two-door",
+                  "title": "Two-door base"
+                }
+              ]
+            },
+            "construction": {
+              "type": "string",
+              "title": "Construction \u00b7 choose before generating",
+              "default": "overlay",
+              "oneOf": [
+                {
+                  "const": "overlay",
+                  "title": "Overlay"
+                },
+                {
+                  "const": "inset",
+                  "title": "Inset"
+                }
+              ]
+            },
+            "style": {
+              "type": "string",
+              "title": "Front style \u00b7 choose before generating",
+              "default": "slab",
+              "oneOf": [
+                {
+                  "const": "slab",
+                  "title": "Slab / Modern"
+                },
+                {
+                  "const": "shaker",
+                  "title": "Shaker"
+                },
+                {
+                  "const": "raised-panel",
+                  "title": "Raised panel"
+                }
+              ]
+            },
+            "name": {
+              "type": "string",
+              "title": "Name",
+              "default": "SDH Base",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "width": {
+              "type": "number",
+              "title": "Width (mm)",
+              "default": 609.6,
+              "minimum": 250,
+              "maximum": 2000
+            },
+            "height": {
+              "type": "number",
+              "title": "Height including toe kick (mm)",
+              "default": 876.3,
+              "minimum": 400,
+              "maximum": 1500
+            },
+            "depth": {
+              "type": "number",
+              "title": "Carcass depth (mm)",
+              "default": 609.6,
+              "minimum": 300,
+              "maximum": 1000
+            },
+            "plinth": {
+              "type": "number",
+              "title": "Toe-kick height (mm)",
+              "default": 101.6,
+              "minimum": 1,
+              "maximum": 300
+            },
+            "drawer_count": {
+              "type": "integer",
+              "title": "Drawer count \u00b7 ignored for two-door",
+              "default": 3,
+              "minimum": 1,
+              "maximum": 4
+            },
+            "face_frame_width": {
+              "type": "number",
+              "title": "Face-frame width (mm)",
+              "default": 38.1,
+              "minimum": 18,
+              "maximum": 100
+            },
+            "front_frame_width": {
+              "type": "number",
+              "title": "Front stile/rail width (mm)",
+              "default": 50.8,
+              "minimum": 20,
+              "maximum": 100
+            },
+            "reveal": {
+              "type": "number",
+              "title": "Reveal (mm)",
+              "default": 2,
+              "minimum": 0.5,
+              "maximum": 10
+            }
+          }
+        }
+      },
       {
         "name": "cabinet",
         "effect": "edit",
@@ -94,7 +225,7 @@
         "input_schema": { "type": "object", "properties": {} }
       }
     ],
-    "commands": ["solid.box", "solid.hole", "solid.chamfer", "solid.pattern.rectangular", "parameters.add", "timeline.group", "component.create", "component.activate", "occurrence.move", "occurrence.ground", "component.list", "model.mesh", "joint.as_built", "joint.limits", "material.list", "material.create", "material.assign", "inspect.measure", "document.inspect"],
+    "commands": ["sketch.create", "sketch.rectangle.two_point", "sketch.finish", "solid.loft", "solid.box", "solid.hole", "solid.chamfer", "solid.pattern.rectangular", "parameters.add", "timeline.group", "component.create", "component.activate", "occurrence.move", "occurrence.ground", "component.list", "model.mesh", "joint.as_built", "joint.limits", "material.list", "material.create", "material.assign", "inspect.measure", "document.inspect"],
     "limits": { "fuel": 500000000, "memory_mib": 64, "deadline_ms": 30000 }
   }
 }

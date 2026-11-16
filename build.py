@@ -17,7 +17,8 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).parent
-PKG = ROOT / "dist" / "woodwork"
+PACKAGE_ID = json.loads((ROOT / "plugin.json").read_text(encoding="utf-8"))["id"]
+PKG = ROOT / "dist" / PACKAGE_ID
 os.environ["PATH"] += os.pathsep + str(Path.home() / ".cargo" / "bin")
 CLI = shutil.which("solidcraft-cli") or r"C:\Program Files\SolidCraft\solidcraft-cli.exe"
 
@@ -44,15 +45,18 @@ def build():
     sh("cargo", "test", "--quiet")
     sh("cargo", "build", "--release", "--target", "wasm32-unknown-unknown")
     PKG.mkdir(parents=True, exist_ok=True)
+    target = Path(os.environ.get("CARGO_TARGET_DIR", ROOT / "target"))
     sh("wasm-tools", "component", "new",
-       "target/wasm32-unknown-unknown/release/woodwork.wasm", "-o", str(PKG / "woodwork.wasm"))
-    shutil.copy(ROOT / "plugin.json", PKG)
+       str(target / "wasm32-unknown-unknown/release/woodwork.wasm"), "-o", str(PKG / "woodwork.wasm"))
+    # SolidCraft caps manifest bytes; keep the readable source, compact the package.
+    manifest = json.loads((ROOT / "plugin.json").read_text(encoding="utf-8"))
+    (PKG / "plugin.json").write_text(json.dumps(manifest, separators=(",", ":")) + "\n", encoding="utf-8")
     shutil.copy(ROOT / "LICENSE", PKG)
     version = json.loads((PKG / "plugin.json").read_text(encoding="utf-8"))["version"]
-    archive = ROOT / "dist" / f"woodwork-{version}.zip"
+    archive = ROOT / "dist" / f"{PACKAGE_ID}-{version}.zip"
     with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as z:
         for name in ("plugin.json", "woodwork.wasm", "LICENSE"):
-            z.write(PKG / name, f"woodwork/{name}")
+            z.write(PKG / name, f"{PACKAGE_ID}/{name}")
     return archive
 
 

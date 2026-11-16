@@ -1,6 +1,7 @@
 //! Woodworking plugin for SolidCraft. The modules are plain Rust that turn parameters into
 //! app commands, so `cargo test` covers them; only `guest` touches the wasm bindings.
 
+mod base;
 mod cabinet;
 mod corner;
 mod cutlist;
@@ -21,7 +22,7 @@ pub type Run<'a> = &'a mut dyn FnMut(&str, Value) -> Result<Value, String>;
 
 pub fn execute(entry: &str, params: &Value, run: Run) -> Result<Value, String> {
     match entry {
-        "cabinet" | "corner" => {
+        "cabinet" | "corner" | "base" => {
             // Where it goes: on the origin, or against the cabinet that is selected.
             let place = params["place"].as_str().unwrap_or("origin");
             check(
@@ -53,6 +54,7 @@ pub fn execute(entry: &str, params: &Value, run: Run) -> Result<Value, String> {
             }
             let (commands, mut summary) = match entry {
                 "cabinet" => cabinet::build(&params)?,
+                "base" => base::build(&params)?,
                 _ => corner::build(&params)?,
             };
             // The cabinet is a component of its own, inside whichever component is active:
@@ -64,6 +66,18 @@ pub fn execute(entry: &str, params: &Value, run: Run) -> Result<Value, String> {
             summary["occurrence"] = made["occurrence"].clone();
             for (command, args) in commands {
                 run(command, args)?;
+            }
+            if entry == "base" {
+                // Include patterned copies in the material assignment and returned part list.
+                let measure = run("inspect.measure", json!({}))?;
+                let prefix = format!("{} ", summary["name"].as_str().unwrap());
+                summary["bodies"] = json!(measure["bodies"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .filter_map(|b| b["name"].as_str())
+                    .filter(|name| name.starts_with(&prefix))
+                    .collect::<Vec<_>>());
             }
             let board = params["material"].as_str().unwrap_or("Birch plywood");
             if board != "none" {

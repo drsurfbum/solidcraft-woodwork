@@ -432,7 +432,7 @@ dependencies = [
 
 [[package]]
 name = "woodwork"
-version = "0.1.6"
+version = "0.1.6-sdh.1"
 dependencies = [
  "serde_json",
  "wit-bindgen",

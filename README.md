@@ -1,3 +1,15 @@
+# Woodwork SDH
+
+SDH fork of [TomasDJo/solidcraft-woodwork](https://github.com/TomasDJo/solidcraft-woodwork), based on the tested **v0.1.6** release. The original MIT license and upstream generators are preserved. This fork adds **SDH Base Cabinet** for drawer and two-door bases across overlay/inset × slab/shaker/raised-panel. It runs in vanilla SolidCraft 0.43.0; no patched SolidCraft or cabinet-specific BIMCraft code is required.
+
+**Initial coordination study, not a fabrication release.** See [the SDH contract and acceptance](SDH.md) and [roadmap / upstream overlap](SDH-ROADMAP.md). Construction and style are choices made before generating; dimensions and 1–4 drawers remain editable source parameters. The separate package id `woodwork-sdh` lets this coexist with official Woodwork.
+
+Build and test: `python build.py` (Rust, wasm32 target, wasm-tools and SolidCraft 0.43 CLI on PATH). Install the resulting `dist/woodwork-sdh-0.1.6-sdh.1.zip` through SolidCraft's plugin installer, or use `python build.py --install`. The package manifest is compacted to fit SolidCraft's byte limit; the source manifest stays readable.
+
+---
+
+## Original upstream documentation
+
 # solidcraft-woodwork
 
 Woodworking plugin for SolidCraft: parametric cabinets, materials, joinery and a cut list.
