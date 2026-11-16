@@ -1,6 +1,7 @@
 //! SDH base-cabinet studies. All geometry and repetition live in ordinary SolidCraft
 //! features. Construction/style select a source template; dimensions and drawer count
 //! remain authoring parameters. No BIMCraft-specific geometry or parameter lookup.
+pub(crate) mod controls;
 use crate::{
     cabinet,
     kit::{check, mm, num, Kit},
@@ -100,11 +101,27 @@ pub fn build(p: &Value) -> Result<(Commands, Value), String> {
     carcass["drawers"] = json!(0);
     carcass["doors"] = json!(0);
     carcass["dividers"] = json!(0);
-    carcass["shelves"] = json!(if layout == "two-door" { 1 } else { 0 });
+    carcass["shelves"] = json!(0);
     carcass["back"] = json!("groove");
     carcass["shelf_pins"] = json!(false);
     carcass["handles"] = json!("none");
     let (mut commands, mut summary) = cabinet::build(&carcass)?;
+    let setback = num(p, "toe_kick_setback", 76.2)?;
+    check(
+        setback > 0.0 && setback < d - 50.0,
+        "toe-kick setback must leave at least 50 mm of cabinet depth",
+    )?;
+    let es = kit.parameter(
+        "toe_kick_setback",
+        setback,
+        "toe-kick recess measured back from the carcass front, excluding fronts",
+    );
+    for (cmd, args) in &mut commands {
+        if *cmd == "solid.box" && args["name"] == format!("{} Plinth", kit.name) {
+            args["corner"][1] = json!(format!("{es}-{} /2", kit.prefix.clone() + "_depth"));
+        }
+    }
+    let mut controls = controls::Controls::new(&kit, p, layout == "drawers")?;
     let id = |key: &str| format!("{}_{key}", kit.prefix);
     let (ew, eh, ed, epl) = (id("width"), id("height"), id("depth"), id("plinth"));
     kit.centre(&ew, &ed);
@@ -125,6 +142,19 @@ pub fn build(p: &Value) -> Result<(Commands, Value), String> {
         kit.push(("parameters.add",json!({"name":en,"expression":count.to_string(),"unit":"","comment":"Number of equal drawers; tested 1 through 4"})));
     }
     let zero = mm(0.0);
+    let sides = [
+        format!("{} Side L", kit.name),
+        format!("{} Side R", kit.name),
+    ];
+    kit.panel(
+        "Toe-kick notch",
+        [&zero, &zero, &zero],
+        [&ew, &es, &epl],
+        Some(&sides),
+    );
+    if layout == "two-door" {
+        controls.shelves(&kit, p)?;
+    }
     let frame_y = format!("-{efd}");
     let inner_w = format!("{ew}-2*{ef}");
     kit.panel(
@@ -202,9 +232,36 @@ pub fn build(p: &Value) -> Result<(Commands, Value), String> {
     if layout == "two-door" {
         let dw = format!("({width}-{er})/2");
         front.build("Door L", [&x, &y, &z], &dw, &height);
-        front.build("Door R", [&format!("{x}+{dw}+{er}"), &y, &z], &dw, &height);
+        let rx = format!("{x}+{dw}+{er}");
+        front.build("Door R", [&rx, &y, &z], &dw, &height);
+        controls.handles(
+            &kit,
+            "Hardware L",
+            [&x, &y, &z],
+            [&dw, &height],
+            Some(false),
+            None,
+        );
+        controls.handles(
+            &kit,
+            "Hardware R",
+            [&rx, &y, &z],
+            [&dw, &height],
+            Some(true),
+            None,
+        );
     } else {
-        let mut repeated = front.build("Drawer Front", [&x, &y, &z], &width, &height);
+        let fronts = front.build("Drawer Front", [&x, &y, &z], &width, &height);
+        kit.push(("solid.pattern.rectangular",json!({"bodies":fronts,"dir1":[0,0,1],"count1":en,"spacing1":pitch,"name":format!("{} Front array",kit.name)})));
+        controls.handles(
+            &kit,
+            "Hardware",
+            [&x, &y, &z],
+            [&width, &height],
+            None,
+            Some((&en, &pitch)),
+        );
+        let mut repeated = Vec::new();
         let slide = kit.parameter("slide_clearance", 12.7, "drawer slide clearance each side");
         let box_t = kit.parameter(
             "drawer_box_thickness",
@@ -277,6 +334,11 @@ pub fn build(p: &Value) -> Result<(Commands, Value), String> {
     }
     let (extra, parts) = kit.finish(Vec::new(), [w, h, d]);
     commands.extend(extra);
+    // User inputs must exist before any feature that references them.
+    commands.sort_by_key(|c| c.0 != "parameters.add");
+    controls.fronts(&commands);
+    summary["source_controls"] =
+        json!({"parameters":controls.parameters,"switches":controls.switches});
     commands.retain(|c| c.0 != "timeline.group");
     let features: Vec<Value> = commands
         .iter()
@@ -411,7 +473,7 @@ mod tests {
                     let (cmd, s) =
                         build(&json!({"layout":layout,"construction":construction,"style":style}))
                             .unwrap();
-                    assert!(cmd.len() < 100);
+                    assert!(cmd.len() < 230);
                     assert_eq!(s["construction"], construction);
                     assert_eq!(s["style"], style);
                 }

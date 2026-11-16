@@ -64,8 +64,13 @@ pub fn execute(entry: &str, params: &Value, run: Run) -> Result<Value, String> {
                 json!({"name": summary["name"], "grounded": false}),
             )?;
             summary["occurrence"] = made["occurrence"].clone();
+            let mut feature_ids = std::collections::BTreeMap::new();
             for (command, args) in commands {
-                run(command, args)?;
+                let feature_name = args["name"].as_str().map(String::from);
+                let result = run(command, args)?;
+                if let (Some(name), Some(id)) = (feature_name, result["feature"].as_u64()) {
+                    feature_ids.insert(name, id);
+                }
             }
             if entry == "base" {
                 // Include patterned copies in the material assignment and returned part list.
@@ -87,6 +92,18 @@ pub fn execute(entry: &str, params: &Value, run: Run) -> Result<Value, String> {
                     .map(String::from)
                     .collect();
                 material::assign(run, board, &bodies)?;
+            }
+            if entry == "base" {
+                base::controls::install(run, &mut summary, &feature_ids)?;
+                let measure = run("inspect.measure", json!({}))?;
+                let prefix = format!("{} ", summary["name"].as_str().unwrap());
+                summary["bodies"] = json!(measure["bodies"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .filter_map(|b| b["name"].as_str())
+                    .filter(|n| n.starts_with(&prefix))
+                    .collect::<Vec<_>>());
             }
             // Back to where the user was working.
             run("component.activate", json!({"component": made["parent"]}))?;

@@ -10,7 +10,7 @@ def validate(measure, layout, construction, style, count=3, w=609.6, h=876.3, d=
     assert abs(max(v[3] for v in bb.values())-w/2)<.001
     assert abs(max(v[5] for v in bb.values())-h)<.001
     front_y=-d/2-19.05-(21.05 if construction=='overlay' else 0)
-    assert abs(min(v[1] for v in bb.values())-front_y)<.001
+    assert abs(min(v[1] for k,v in bb.items() if "Hardware" not in k)-front_y)<.001
     if layout=='drawers':
         names=[k for k in bb if ' Drawer Front' in k]
         assert len(names)==count*(1 if style=='slab' else 5),(style,len(names),count)

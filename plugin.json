@@ -1,7 +1,7 @@
 {
   "id": "woodwork-sdh",
   "name": "Woodwork SDH",
-  "version": "0.1.6-sdh.1",
+  "version": "0.1.6-sdh.2",
   "description": "Cabinets and furniture in sheet goods: carcass generator and cut list.",
   "capabilities": ["commands@0.1"],
   "runtime": {
@@ -134,6 +134,68 @@
               "default": 2,
               "minimum": 0.5,
               "maximum": 10
+            },
+            "show_fronts": {
+              "type": "boolean",
+              "title": "Show fronts",
+              "default": true
+            },
+            "show_hardware": {
+              "type": "boolean",
+              "title": "Show hardware",
+              "default": true
+            },
+            "use_knobs": {
+              "type": "boolean",
+              "title": "Use knobs instead of bar pulls",
+              "default": false
+            },
+            "center_hardware": {
+              "type": "boolean",
+              "title": "Center hardware vertically",
+              "default": true
+            },
+            "toe_kick_setback": {
+              "type": "number",
+              "title": "Toe-kick setback from carcass front (mm)",
+              "default": 76.2,
+              "minimum": 1,
+              "maximum": 250
+            },
+            "shelf_count": {
+              "type": "integer",
+              "title": "Shelves (two-door only)",
+              "default": 1,
+              "minimum": 0,
+              "maximum": 6
+            },
+            "hardware_x_offset": {
+              "type": "number",
+              "title": "Hardware horizontal offset (mm)",
+              "default": 0,
+              "minimum": -100,
+              "maximum": 100
+            },
+            "hardware_top_offset": {
+              "type": "number",
+              "title": "Hardware center below front top (mm)",
+              "default": 88.9,
+              "minimum": 0,
+              "maximum": 400
+            },
+            "pull_length": {
+              "type": "number",
+              "title": "Pull post spacing (mm)",
+              "default": 128,
+              "minimum": 30,
+              "maximum": 300
+            },
+            "hardware_projection": {
+              "type": "number",
+              "title": "Hardware projection (mm)",
+              "default": 25.4,
+              "minimum": 10,
+              "maximum": 75
             }
           }
         }
@@ -225,7 +287,7 @@
         "input_schema": { "type": "object", "properties": {} }
       }
     ],
-    "commands": ["sketch.create", "sketch.rectangle.two_point", "sketch.finish", "solid.loft", "solid.box", "solid.hole", "solid.chamfer", "solid.pattern.rectangular", "parameters.add", "timeline.group", "component.create", "component.activate", "occurrence.move", "occurrence.ground", "component.list", "model.mesh", "joint.as_built", "joint.limits", "material.list", "material.create", "material.assign", "inspect.measure", "document.inspect"],
+    "commands": ["sketch.create", "sketch.rectangle.two_point", "sketch.finish", "solid.loft", "solid.box", "solid.hole", "solid.chamfer", "solid.pattern.rectangular", "parameters.add", "timeline.group", "component.create", "component.activate", "occurrence.move", "occurrence.ground", "component.list", "model.mesh", "joint.as_built", "joint.limits", "material.list", "material.create", "material.assign", "inspect.measure", "document.inspect", "solid.cylinder", "config.configure", "config.rule", "config.activate", "config.row"],
     "limits": { "fuel": 500000000, "memory_mib": 64, "deadline_ms": 30000 }
   }
 }

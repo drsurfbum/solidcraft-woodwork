@@ -7,7 +7,7 @@ Baseline: upstream v0.1.6, `b905965224a4378e2f063faf92278b0fbd9bbfce`. Runtime r
 | Layout | Overlay | Inset |
 | --- | --- | --- |
 | Drawer base, editable count 1–4 | Slab, shaker, raised panel | Slab, shaker, raised panel |
-| Two-door base, fixed pair and one shelf | Slab, shaker, raised panel | Slab, shaker, raised panel |
+| Two-door base, fixed pair and adjustable shelves | Slab, shaker, raised panel | Slab, shaker, raised panel |
 
 Both construction choices use a face-frame carcass. Overlay fronts cover the face frame; inset fronts fit within its opening, flush with the frame face and separated by the authored reveal. Inset drawers include divider rails that follow the count. This is a defined first construction standard, not a claim to cover frameless overlay or beaded inset.
 
@@ -25,6 +25,23 @@ Defaults are explicit study inputs, not a cabinet maker's approved standards: 60
 
 Generation rejects invalid layouts/styles, fractional/out-of-range initial counts and undersized fronts/panels. Later parameter edits use SolidCraft's feature validation; general maker-specific bounds and interference validation are future work. The tested resizing range is representative, not a guarantee for every combination of dimensions.
 
+## Shared controls — SDH 0.1.6-sdh.2
+
+The same twelve presets now include:
+
+- `show_fronts`, `show_hardware`, `use_knobs`, `center_hardware`: ordinary dimensionless 0/1 inputs, with source-authored configuration suppression. Hiding fronts retains drawers/interiors and hides attached hardware. Inactive hardware variants are suppressed solids, not invisible exported meshes.
+- `shelf_count`: two-door interior, tested 0–6 evenly spaced shelves. Drawer count remains 1–4. No generator rerun is needed.
+- `plinth` height and `toe_kick_setback`: genuine recessed toe kick and notched side panels. Setback is measured from the carcass front, excluding frame/front projection.
+- `hardware_x_offset`: drawer shift from center; door inward shift from a 38.1 mm meeting-edge baseline. `hardware_top_offset`: down from front top to hardware center when vertical centering is off. `pull_length`: post spacing; `hardware_projection`: projection from the front.
+
+Default hardware is a 128 mm bar pull, 25.4 mm projection, vertically centered. Turning centering off uses 88.9 mm from the top. Knobs are a simple 25.4 mm diameter coordination shape. Source material assignment retains the plugin's existing board material behavior; these are not manufacturer-specific fittings or machining definitions.
+
+Source configuration rows/rules are saved in vanilla SolidCraft 0.43. Adding another cabinet snapshots the current design rather than restoring earlier Default-row values. This prevents adding a new cabinet from resetting prior visibility edits. Publication still requires one standalone cabinet per source design.
+
+The generic receiving importer explicitly maps source dimensionless inputs to Number, Whole number or Yes/No; it does not infer control kinds from names. Authors retain scope/group choices. Demonstration counts/visibility/offsets/toe kick/width are Instance, other construction and hardware sizes Type. Source defaults/descriptions remain visible during review.
+
+Only generator-time ranges and native feature validity are currently enforced. Arbitrary subsequent edits need further bounds/interference work: negative hardware projection is geometrically evaluable but physically inappropriate. Do not interpret successful evaluation as fabrication validation.
+
 ## Acceptance
 
 `cargo test`: 23 unit tests. `cargo clippy --all-targets -- -D warnings` and rustfmt checks. Upstream end-to-end tests retained; additional `tests/test_base.py` exercises all 12 templates, 30 edited dimension/count states, reopen, positive solid volumes, drawer counts, frame reveals and panel depth. The built package is tested in vanilla SC43.
@@ -40,9 +57,9 @@ Revit references: user-provided casework Properties/Edit Type examples; Autodesk
 | Count changes rebuild actual parts | Supported and tested 1–4 drawers, including inset rails |
 | Editable enum changing style inside BIM Properties | Not implemented; explicit source preset and republish |
 | Save, reopen and compatible source reload | Tested on source and receiving projects |
-| Hardware, opening motion and fabrication joinery | Not part of the new base templates; existing upstream cabinet entry remains available |
+| Hardware / opening motion / fabrication joinery | Coordination knob/pull geometry and source-driven placement/visibility supported; motion and fabrication joinery not accepted |
 | Native associative drawings and production cut lists | Not accepted by this slice; coordination sheets are a separate workflow |
 
-Known downstream view limitation: BIMCraft Rust 0.12 working-build 2D elevations can omit edges on the new fronts made from separate parts. Source and 3D geometry tests pass. Comparison previews use front-facing 3D renders; do not substitute those for accepted native technical elevations.
+The receiving BIMCraft Rust elevation fix tracks disconnected coplanar mesh patches separately, restoring subpixel gaps on multi-part fronts. It is a generic receiving-app change and does not change source geometry. See the parent workspace cabinet-controls-2026-11-16 evidence for its regression and exact build.
 
 No arbitrary-family or full Revit compatibility claim follows from these cases. Source models and native screenshots used for the SDH work are synthetic.

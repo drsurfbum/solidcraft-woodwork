@@ -1,6 +1,6 @@
 [package]
 name = "woodwork"
-version = "0.1.6-sdh.1"
+version = "0.1.6-sdh.2"
 license = "MIT"
 edition = "2021"
 description = "Woodworking plugin for SolidCraft: cabinets and cut lists"
